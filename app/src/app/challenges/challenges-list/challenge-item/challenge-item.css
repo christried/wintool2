@@ -92,7 +92,6 @@
 
 /* Timer Display */
 .timer-display {
-  font-family: 'Courier New', Courier, monospace; /* Monospaced for timer */
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
