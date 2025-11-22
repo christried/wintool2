@@ -1,4 +1,4 @@
 <h1>wintool2</h1>
-<p>{{ timer.hh }}:{{ timer.mm }}:{{ timer.ss }}</p>
+<p>{{ { hh: timer.hh, mm: timer.mm, ss: timer.ss } | time }}</p>
 <button (click)="onToggleTimer()">{{ isTimerRunning() }}</button>
 <p>____________header end__________</p>

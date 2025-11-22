@@ -1,0 +1,19 @@
+<button (click)="onToggleComplete()">
+  {{ challengesService.isChallengeComplete(challengeItem().id) ? 'Uncomplete' : 'Complete' }}
+</button>
+<div
+  class="challenge-text"
+  [class]="{
+    open: challengeItem().status === 'OPEN',
+    done: challengeItem().status === 'DONE'
+  }"
+>
+  <h2>{{ challengeItem().game }}</h2>
+  <h4>{{ challengeItem().goal }}</h4>
+</div>
+
+<p>{{ { hh: timer.hh, mm: timer.mm, ss: timer.ss } | time }}</p>
+<button (click)="onToggleTimer()">{{ isTimerRunning() }}</button>
+
+<button (click)="challengesService.deleteGame(challengeItem().id)">delete</button>
+<p>_______challenge_item end_____</p>

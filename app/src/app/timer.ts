@@ -10,7 +10,7 @@ export class Timer {
   hh = 0;
   timerInterval: any;
 
-  onToggleTimer() {
+  ToggleTimer() {
     if (!this.isRunning()) {
       this.timerInterval = setInterval(() => {
         this.ss++;

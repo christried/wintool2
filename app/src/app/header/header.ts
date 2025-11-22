@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { Timer } from '../timer';
+import { TimePipe } from '../time-pipe';
 
 @Component({
   selector: 'app-header',
-  imports: [],
+  imports: [TimePipe],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -15,7 +16,7 @@ export class Header {
   }
 
   onToggleTimer() {
-    this.timer.onToggleTimer();
+    this.timer.ToggleTimer();
   }
   isTimerRunning() {
     return this.timer.isRunning() ? 'Stop' : 'Start';

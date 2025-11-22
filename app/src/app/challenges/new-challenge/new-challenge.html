@@ -1,1 +1,8 @@
-<p>new-challenge works!</p>
+<form (ngSubmit)="onAddGame()" #form>
+  <label for="game">Game</label>
+  <input id="game" name="goal" [(ngModel)]="game" />
+  <label for="goal">Goal</label>
+  <input id="goal" name="goal" [(ngModel)]="goal" />
+  <button>add</button>
+</form>
+<p>___________ New Challenge end _______________</p>
