@@ -1,8 +1,13 @@
-<form (ngSubmit)="onAddGame()" #form>
-  <label for="game">Game</label>
-  <input id="game" name="asdasdasdasdasd" [(ngModel)]="game" />
-  <label for="goal">Goal</label>
-  <input id="goal" name="asdasdas" [(ngModel)]="goal" />
-  <button>add</button>
-</form>
-<p>___________ New Challenge end _______________</p>
+<div class="new-challenge">
+  <form (ngSubmit)="onAddGame()" #form>
+    <span class="input-group">
+      <label class="input-label" for="game">Game</label>
+      <input class="glass-input" id="game" name="asdasdasdasdasd" [(ngModel)]="game" />
+    </span>
+    <span class="input-group">
+      <label class="input-label" for="goal">Goal</label>
+      <input class="glass-input" id="goal" name="asdasdas" [(ngModel)]="goal" />
+    </span>
+    <button class="add-btn">add</button>
+  </form>
+</div>

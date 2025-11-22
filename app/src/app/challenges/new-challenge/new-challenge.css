@@ -1,0 +1,96 @@
+:host {
+  display: block;
+}
+
+.new-challenge {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+
+  padding: 30px;
+}
+
+.new-challenge form {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+/* Container for label + input pair */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow inputs to fill space */
+}
+
+/* Styling the labels */
+.input-label {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  margin-left: 4px;
+}
+
+/* Styling the inputs */
+.glass-input {
+  background: rgba(0, 0, 0, 0.2); /* Darker, transparent bg */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  color: white;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.glass-input:focus {
+  border-color: #38bdf8; /* Blue border on focus */
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Placeholder text color */
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* The "Add" Button */
+.add-btn {
+  /* A different color: Emerald Green for "Add" action */
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  /* Green glow */
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s;
+  height: 50px; /* Fixed height to match inputs */
+}
+
+.add-btn:hover {
+  background-color: #34d399;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustment for smaller screens */
+@media (max-width: 600px) {
+  .new-challenge form {
+    flex-direction: column; /* Stack vertically on mobile */
+    align-items: stretch;
+  }
+  .add-btn {
+    margin-top: 10px;
+  }
+}
