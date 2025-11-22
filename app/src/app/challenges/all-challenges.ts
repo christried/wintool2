@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Challenge } from '../models.model';
+import { Challenge, Status } from '../models.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class AllChallenges {
       game: game,
       goal: goal,
       id: Math.random().toString(),
-      status: 'OPEN',
+      status: Status.OPEN,
     };
 
     this.allChallenges.update((c) => {
@@ -33,7 +33,7 @@ export class AllChallenges {
   toggleComplete(challengeID: string) {
     const newChallenges = this.allChallenges().map((c) => {
       if (c.id === challengeID) {
-        const newStatus = c.status === 'OPEN' ? 'DONE' : 'OPEN';
+        const newStatus = c.status === Status.OPEN ? Status.DONE : Status.OPEN;
         c.status = newStatus;
       }
       return c;
@@ -44,6 +44,6 @@ export class AllChallenges {
 
   isChallengeComplete(challengeID: string): boolean {
     const found = this.allChallenges().find((c) => c.id === challengeID);
-    return found?.status === 'DONE' ? true : false;
+    return found?.status === Status.DONE ? true : false;
   }
 }

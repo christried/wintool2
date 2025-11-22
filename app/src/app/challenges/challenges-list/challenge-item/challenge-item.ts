@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { Challenge } from '../../../models.model';
+import { Challenge, Status } from '../../../models.model';
 import { Timer } from '../../../timer';
 import { TimePipe } from '../../../time-pipe';
 import { AllChallenges } from '../../all-challenges';
@@ -23,6 +23,9 @@ export class ChallengeItem {
 
   onToggleTimer() {
     this.timer.ToggleTimer();
+    if (this.challengeItem().status === Status.DONE) {
+      this.challengesService.toggleComplete(this.challengeItem().id);
+    }
   }
   isTimerRunning() {
     return this.timer.isRunning() ? 'Stop' : 'Start';
@@ -30,6 +33,8 @@ export class ChallengeItem {
 
   onToggleComplete() {
     this.challengesService.toggleComplete(this.challengeItem().id);
-    this.timer.ToggleTimer();
+    if (this.timer.isRunning()) {
+      this.timer.ToggleTimer();
+    }
   }
 }
