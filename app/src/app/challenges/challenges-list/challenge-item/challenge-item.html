@@ -24,8 +24,6 @@
     <button class="btn btn-primary" (click)="onToggleTimer()" [class.running]="timer.isRunning()">
       {{ isTimerRunning() }}
     </button>
-    <button class="btn btn-danger" (click)="challengesService.deleteGame(challengeItem().id)">
-      Delete
-    </button>
+    <button class="btn btn-danger" (click)="onDeleteChallenge()">Delete</button>
   </div>
 </div>

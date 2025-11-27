@@ -37,4 +37,13 @@ export class ChallengeItem {
       this.timer.ToggleTimer();
     }
   }
+
+  onDeleteChallenge() {
+    this.challengesService.deleteGame(this.challengeItem().id).subscribe({
+      next: (resData) => {
+        console.log('Adden erfolgreich, hier resData');
+        console.log(resData);
+      },
+    });
+  }
 }
