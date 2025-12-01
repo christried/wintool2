@@ -5,12 +5,20 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: false,
 })
 export class TimePipe implements PipeTransform {
-  transform(timerData: { hh: number; mm: number; ss: number }): string {
-    const hours = timerData.hh.toString().padStart(2, '0');
-    const minutes = timerData.mm.toString().padStart(2, '0');
-    const seconds = timerData.ss.toString().padStart(2, '0');
+  transform(timerData: { ss: number }): string {
+    const seconds = timerData.ss % 60;
+    let minutes = Math.floor(timerData.ss / 60);
+    let hours = 0;
+    if (minutes >= 60) {
+      hours = Math.floor(minutes / 60);
+      minutes = minutes % 60;
+    }
 
-    // console.log(hours + minutes + seconds);
-    return `${hours}:${minutes}:${seconds}`;
+    console.log('Stunden' + hours);
+    // console.log('Minuten' + minutes);
+    // console.log('Sekunden' + seconds);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
   }
 }

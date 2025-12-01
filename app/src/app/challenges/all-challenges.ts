@@ -31,7 +31,8 @@ export class AllChallenges {
       goal: goal,
       id: Math.random().toString(),
       status: Status.OPEN,
-      timer: null,
+      timer: 0,
+      timeStamp: null,
     };
 
     const prevChallenges = this.allChallenges();
@@ -40,6 +41,23 @@ export class AllChallenges {
       c.push(newChallenge);
       return c;
     });
+
+    return this.httpClient.put('http://localhost:3000/add-game', { challenge: newChallenge }).pipe(
+      catchError((err) => {
+        this.allChallenges.set(prevChallenges);
+        console.log(err);
+        return throwError(
+          () =>
+            new Error(
+              'Fehler beim adden einer neuen Challenge - kriegt man schon wieder hin irgendwie'
+            )
+        );
+      })
+    );
+  }
+
+  updateGame(newChallenge: Challenge) {
+    const prevChallenges = this.allChallenges();
 
     return this.httpClient.put('http://localhost:3000/add-game', { challenge: newChallenge }).pipe(
       catchError((err) => {

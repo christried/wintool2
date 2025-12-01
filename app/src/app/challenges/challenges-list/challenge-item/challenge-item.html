@@ -17,7 +17,7 @@
   </div>
 
   <div class="timer-display">
-    {{ { hh: timer.hh, mm: timer.mm, ss: timer.ss } | time }}
+    {{ { ss: timer.seconds } | time }}
   </div>
 
   <div class="card-actions">

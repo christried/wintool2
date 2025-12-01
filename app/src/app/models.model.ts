@@ -3,7 +3,8 @@ export interface Challenge {
   goal: string;
   id: string;
   status: Status;
-  timer: number | null;
+  timer: number;
+  timeStamp: number | null;
 }
 
 export enum Status {

@@ -38,11 +38,37 @@ app.put('/add-game', async (req, res) => {
 
   if (!challengesData.some((c) => c.id === challenge.id)) {
     updatedChallenges = [...challengesData, challenge];
+  } else {
+    const challIndex = updatedChallenges.findIndex((c) => c.id === challenge.id);
+    updatedChallenges[challIndex] = challenge;
   }
 
   await fs.writeFile('./data/challenges.json', JSON.stringify(updatedChallenges));
 
   res.status(200).json({ challenges: updatedChallenges });
+});
+
+app.get('/header', async (req, res) => {
+  const fileContent = await fs.readFile('./data/header-timer.json');
+
+  const timerData = JSON.parse(fileContent);
+
+  res.status(200).json(timerData);
+});
+
+// expecting {seconds: any, timeStamp: any}
+app.put('/header-timer', async (req, res) => {
+  const seconds = req.body.seconds;
+  const timeStamp = req.body.timeStamp;
+  console.log('PUT kriegt folgende Daten für den Header-Timer:');
+  console.log(seconds);
+  console.log(timeStamp);
+
+  let updatedTimer = { timer: seconds, timeStamp: timeStamp };
+
+  await fs.writeFile('./data/header-timer.json', JSON.stringify(updatedTimer));
+
+  res.status(200).json({ headerTimer: updatedTimer });
 });
 
 app.delete('/delete-game/:id', async (req, res) => {

@@ -1,7 +1,7 @@
 <div class="header">
   <h1 class="hero-title">wintool2</h1>
 
-  <p class="timer">{{ { hh: timer.hh, mm: timer.mm, ss: timer.ss } | time }}</p>
+  <p class="timer">{{ { ss: timer.seconds } | time }}</p>
 
   <button class="btn" (click)="onToggleTimer()">{{ isTimerRunning() }}</button>
 </div>
