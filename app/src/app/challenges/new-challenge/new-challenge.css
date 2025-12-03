@@ -84,6 +84,16 @@
   transform: translateY(-2px);
 }
 
+.control-error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #f19174;
+  height: 0.5rem;
+  padding: 0.5rem 0 0 30%;
+  height: 1.5rem;
+}
+
 /* Responsive adjustment for smaller screens */
 @media (max-width: 600px) {
   .new-challenge form {

@@ -34,7 +34,7 @@ export class Header implements OnInit {
       )
       .subscribe({
         next: (timer) => {
-          console.log('das hier sollten sekunden sein:', timer.timer);
+          // console.log('das hier sollten sekunden sein:', timer.timer);
           this.timer.seconds = timer.timer;
           this.headerStamp.set(timer.timeStamp);
         },

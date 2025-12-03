@@ -14,7 +14,7 @@ export class TimePipe implements PipeTransform {
       minutes = minutes % 60;
     }
 
-    console.log('Stunden' + hours);
+    // console.log('Stunden' + hours);
     // console.log('Minuten' + minutes);
     // console.log('Sekunden' + seconds);
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds

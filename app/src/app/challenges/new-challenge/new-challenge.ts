@@ -1,5 +1,5 @@
-import { Component, DestroyRef, ElementRef, inject, viewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, DestroyRef, inject, viewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { AllChallenges } from '../all-challenges';
 
 @Component({
@@ -9,7 +9,6 @@ import { AllChallenges } from '../all-challenges';
   styleUrl: './new-challenge.css',
 })
 export class NewChallenge {
-  private formElement = viewChild<ElementRef<HTMLFormElement>>('form');
   private destroyRef = inject(DestroyRef);
 
   challengesService = inject(AllChallenges);
@@ -17,7 +16,16 @@ export class NewChallenge {
   game: string = '';
   goal: string = '';
 
-  onAddGame() {
+  onAddGame(formData: NgForm) {
+    // console.log(formData);
+
+    formData.form.controls['game'].markAsTouched();
+    formData.form.controls['goal'].markAsTouched();
+
+    if (formData.form.invalid) {
+      return;
+    }
+
     const subscription = this.challengesService
       .addGame({ game: this.game, goal: this.goal })
       .subscribe({
@@ -26,7 +34,8 @@ export class NewChallenge {
           console.log(resData);
         },
       });
-    this.formElement()!.nativeElement.reset();
+
+    formData.form.reset();
 
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }

@@ -1,13 +1,16 @@
 <div class="new-challenge">
-  <form (ngSubmit)="onAddGame()" #form>
+  <form #form="ngForm" (ngSubmit)="onAddGame(form)">
     <span class="input-group">
       <label class="input-label" for="game">Game</label>
-      <input class="glass-input" id="game" name="asdasdasdasdasd" [(ngModel)]="game" />
+      <input class="glass-input" id="game" name="game" [(ngModel)]="game" required />
     </span>
     <span class="input-group">
       <label class="input-label" for="goal">Goal</label>
-      <input class="glass-input" id="goal" name="asdasdas" [(ngModel)]="goal" />
+      <input class="glass-input" id="goal" name="goal" [(ngModel)]="goal" required />
     </span>
     <button class="add-btn">add</button>
   </form>
+  @if (form.controls["game"]?.touched && form.controls["goal"]?.touched && form.invalid) {
+  <p class="control-error">Please enter all challenge details.</p>
+  }
 </div>
