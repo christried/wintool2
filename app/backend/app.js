@@ -58,32 +58,46 @@ app.put('/add-game', async (req, res) => {
 
 app.get('/header/:sessionId', async (req, res) => {
   const sessionId = req.params.sessionId;
-  const timerData = {};
 
-  if (sessionId === 'initial') {
-    timerData = { timer: 889, timeStamp: 1764752996612 };
-  } else {
-    const fileContent = await fs.readFile('./data/' + sessionId + '/header-timer.json');
-
-    timerData = JSON.parse(fileContent);
+  if (sessionId === 'initial' || !sessionId) {
+    return res.status(200).json({ timer: 0, timeStamp: null });
   }
 
-  res.status(200).json(timerData);
+  try {
+    const fileContent = await fs.readFile('./data/' + sessionId + '/header-timer.json');
+    const timerData = JSON.parse(fileContent);
+    res.status(200).json(timerData);
+  } catch (error) {
+    // If file doesn't exist (new session), return 0 instead of crashing
+    console.log(`No timer found for ${sessionId}, defaulting to 0.`);
+    res.status(200).json({ timer: 0, timeStamp: null });
+  }
 });
 
-// expecting {seconds: any, timeStamp: any}
 app.put('/header-timer', async (req, res) => {
   const seconds = req.body.seconds;
   const timeStamp = req.body.timeStamp;
-  console.log('PUT kriegt folgende Daten für den Header-Timer:');
-  console.log(seconds);
-  console.log(timeStamp);
+  const sessionId = req.body.sessionId;
 
-  let updatedTimer = { timer: seconds, timeStamp: timeStamp };
+  console.log(`PUT header-timer for session: ${sessionId}`);
 
-  await fs.writeFile('./data/header-timer.json', JSON.stringify(updatedTimer));
+  // Only save if we have a valid session (not 'initial')
+  if (sessionId && sessionId !== 'initial') {
+    const updatedTimer = { timer: seconds, timeStamp: timeStamp };
 
-  res.status(200).json({ headerTimer: updatedTimer });
+    try {
+      await fs.writeFile(
+        './data/' + sessionId + '/header-timer.json',
+        JSON.stringify(updatedTimer)
+      );
+      res.status(200).json({ headerTimer: updatedTimer });
+    } catch (error) {
+      console.error('Error saving timer:', error);
+      res.status(500).json({ message: 'Could not save timer' });
+    }
+  } else {
+    res.status(200).json({ message: 'Initial session - timer not saved.' });
+  }
 });
 
 app.delete('/delete-game/:sessionId/:id', async (req, res) => {

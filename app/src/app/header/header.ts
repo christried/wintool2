@@ -71,10 +71,14 @@ export class Header implements OnInit, OnChanges {
 
     this.headerStamp.set(Date.now());
 
-    const updatedTimerData = { seconds: this.timer.seconds, timeStamp: this.headerStamp() };
-    // Wenn Timer gestartet wird, dann neuen Timestamp im Backend hinterlegen
+    const updatedTimerData = {
+      seconds: this.timer.seconds,
+      timeStamp: this.headerStamp(),
+      sessionId: this.sessionId(),
+    };
+
     updatedTimerData.timeStamp = this.timer.isRunning() ? Date.now() : updatedTimerData.timeStamp;
-    // Wenn Timer pausiert wird, dann Zeit berechnen aus altem Timestamp und neuem Timestamp & Zeit im Backend hinterlegen
+
     if (!this.timer.isRunning()) {
       const ms = Date.now() - this.headerStamp()!;
       updatedTimerData.seconds = this.timer.seconds + Math.floor(ms / 1000);
@@ -85,23 +89,18 @@ export class Header implements OnInit, OnChanges {
       .pipe(
         catchError((err) => {
           console.log(err);
-          return throwError(
-            () =>
-              new Error(
-                'Fehler beim Updaten des Header-Timers ins Backend - bald ist es geschafft glaub ich'
-              )
-          );
+          return throwError(() => new Error('Fehler beim Updaten des Header-Timers ins Backend'));
         })
       )
       .subscribe({
         next: (resData) => {
-          console.log('Header-Timer Update ins Backend erfolgreich, hier resData');
-          console.log(resData);
+          console.log('Header-Timer Update successful', resData);
         },
       });
 
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
+
   isTimerRunning() {
     return this.timer.isRunning() ? 'Stop' : 'Start';
   }
