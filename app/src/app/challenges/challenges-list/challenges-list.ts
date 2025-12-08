@@ -17,7 +17,7 @@ export class ChallengesList implements OnInit {
   sessionId = input.required<string>();
 
   ngOnInit(): void {
-    console.log(this.sessionId());
+    // console.log(this.sessionId());
     const subscription = this.challengesService.fetchChallenges(this.sessionId()).subscribe({
       next: (challenges) => {
         this.allChallenges.set(challenges);

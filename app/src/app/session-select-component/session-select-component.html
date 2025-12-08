@@ -1,8 +1,17 @@
 @for (session of sessions; track $index) {
-<a (click)="OnSelectSession(session)" [routerLink]="['/', session]">
+<a (click)="onSelectSession(session)" [routerLink]="['/', session]">
   <button>
     {{ session }}
   </button>
 </a>
 }
-<button (click)="OnAddSession()">add session</button>
+<!-- <button (click)="OnAddSession()">add session</button> -->
+
+<form #form="ngForm">
+  <span>
+    <label>New Session</label>
+    <input id="newSession" name="newSession" [(ngModel)]="newSession" />
+  </span>
+
+  <button type="submit" class="add-btn" (click)="onAddSession(form)">add</button>
+</form>

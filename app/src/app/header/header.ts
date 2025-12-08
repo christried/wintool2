@@ -107,6 +107,6 @@ export class Header implements OnInit, OnChanges {
   }
 
   onClickBack() {
-    this.sessionsService.clearSessionID();
+    this.sessionsService.setSessionID();
   }
 }

@@ -100,6 +100,51 @@ app.put('/header-timer', async (req, res) => {
   }
 });
 
+app.post('/sessions', async (req, res) => {
+  const newSessionId = req.body.sessionId;
+
+  console.log(`POST session ID: ${newSessionId}`);
+
+  if (!newSessionId) {
+    return res.status(400).json({ message: 'Session ID missing' });
+  }
+
+  try {
+    let sessionsData = [];
+
+    try {
+      const sessionsFileContent = await fs.readFile('./data/sessions.json', 'utf-8');
+      sessionsData = JSON.parse(sessionsFileContent);
+    } catch (readError) {
+      console.log('Sessions file does not exist yet, creating a new one.');
+    }
+
+    let updatedSessions = sessionsData;
+
+    if (!sessionsData.includes(newSessionId)) {
+      updatedSessions = [...sessionsData, newSessionId];
+
+      try {
+        await fs.mkdir('./data/' + newSessionId, { recursive: true });
+        await fs.writeFile('./data/' + newSessionId + '/challenges.json', '[]');
+        await fs.writeFile(
+          './data/' + newSessionId + '/header-timer.json',
+          JSON.stringify({ timer: 0, timeStamp: null })
+        );
+      } catch (dirError) {
+        console.error('Error creating session directory:', dirError);
+      }
+    }
+
+    await fs.writeFile('./data/sessions.json', JSON.stringify(updatedSessions));
+
+    res.status(200).json({ sessions: updatedSessions });
+  } catch (error) {
+    console.error('Server Crash prevented:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 app.delete('/delete-game/:sessionId/:id', async (req, res) => {
   const challengeId = req.params.id;
   const sessionId = req.params.sessionId;
