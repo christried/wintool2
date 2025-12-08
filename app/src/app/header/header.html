@@ -1,4 +1,7 @@
 <div class="header">
+  @if (sessionsService.currentSessionId() !== "initial") {
+  <a (click)="onClickBack()" routerLink="../"> <button>🔙</button></a>
+  }
   <h1 class="hero-title">wintool2</h1>
 
   <p class="timer">{{ { ss: timer.seconds } | time }}</p>

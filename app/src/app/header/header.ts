@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   effect,
@@ -11,16 +12,16 @@ import {
 import { Timer } from '../timer';
 import { TimePipe } from '../time-pipe';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, throwError } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { RouterLink } from '@angular/router';
 import { SessionsService } from '../session-select-component/sessions-service';
-import { sign } from 'crypto';
 
 @Component({
   selector: 'app-header',
-  imports: [TimePipe],
+  imports: [TimePipe, RouterLink],
   templateUrl: './header.html',
   styleUrl: './header.css',
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class Header implements OnInit, OnChanges {
   private destroyRef = inject(DestroyRef);
@@ -103,5 +104,9 @@ export class Header implements OnInit, OnChanges {
 
   isTimerRunning() {
     return this.timer.isRunning() ? 'Stop' : 'Start';
+  }
+
+  onClickBack() {
+    this.sessionsService.clearSessionID();
   }
 }

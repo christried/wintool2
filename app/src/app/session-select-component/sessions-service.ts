@@ -22,4 +22,8 @@ export class SessionsService {
     this.currentSessionId.set(sessionID);
     console.log('Session ID jetzt: ' + sessionID);
   }
+
+  clearSessionID() {
+    this.currentSessionId.set('initial');
+  }
 }
