@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { NewChallenge } from './new-challenge/new-challenge';
 import { ChallengesList } from './challenges-list/challenges-list';
 
@@ -8,4 +8,6 @@ import { ChallengesList } from './challenges-list/challenges-list';
   templateUrl: './challenges.html',
   styleUrl: './challenges.css',
 })
-export class Challenges {}
+export class Challenges {
+  sessionId = input.required<string>();
+}

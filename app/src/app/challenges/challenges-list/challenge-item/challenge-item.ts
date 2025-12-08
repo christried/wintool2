@@ -14,7 +14,9 @@ export class ChallengeItem implements OnInit {
   private destroyRef = inject(DestroyRef);
   challengeItem = input.required<Challenge>();
   challengesService = inject(AllChallenges);
+
   public timer: Timer;
+  sessionId = input.required<string>();
 
   constructor() {
     this.timer = new Timer();
@@ -40,12 +42,14 @@ export class ChallengeItem implements OnInit {
       updatedChallenge.timer += Math.floor(ms / 1000);
     }
 
-    const subscription = this.challengesService.updateGame(updatedChallenge).subscribe({
-      next: (resData) => {
-        console.log('Adden erfolgreich, hier resData');
-        console.log(resData);
-      },
-    });
+    const subscription = this.challengesService
+      .updateGame(updatedChallenge, this.sessionId())
+      .subscribe({
+        next: (resData) => {
+          console.log('Adden erfolgreich, hier resData');
+          console.log(resData);
+        },
+      });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
@@ -61,7 +65,7 @@ export class ChallengeItem implements OnInit {
   }
 
   onDeleteChallenge() {
-    this.challengesService.deleteGame(this.challengeItem().id).subscribe({
+    this.challengesService.deleteGame(this.challengeItem().id, this.sessionId()).subscribe({
       next: (resData) => {
         console.log('Deleten erfolgreich, hier resData');
         console.log(resData);

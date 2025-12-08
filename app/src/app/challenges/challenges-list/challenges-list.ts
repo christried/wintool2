@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, input, OnInit } from '@angular/core';
 import { AllChallenges } from '../all-challenges';
 import { ChallengeItem } from './challenge-item/challenge-item';
 
@@ -12,11 +12,13 @@ export class ChallengesList implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   challengesService = inject(AllChallenges);
-
   allChallenges = this.challengesService.allChallenges;
 
+  sessionId = input.required<string>();
+
   ngOnInit(): void {
-    const subscription = this.challengesService.fetchChallenges().subscribe({
+    console.log(this.sessionId());
+    const subscription = this.challengesService.fetchChallenges(this.sessionId()).subscribe({
       next: (challenges) => {
         this.allChallenges.set(challenges);
       },

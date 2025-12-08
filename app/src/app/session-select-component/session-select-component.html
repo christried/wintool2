@@ -1,0 +1,8 @@
+@for (session of sessions; track $index) {
+<a (click)="OnSelectSession(session)" [routerLink]="['/', session]">
+  <button>
+    {{ session }}
+  </button>
+</a>
+}
+<button (click)="OnAddSession()">add session</button>

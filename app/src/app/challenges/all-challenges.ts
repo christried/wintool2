@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, input, signal } from '@angular/core';
 import { Challenge, Status } from '../models.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, throwError } from 'rxjs';
@@ -11,9 +11,9 @@ export class AllChallenges {
 
   allChallenges = signal<Challenge[]>([]);
 
-  fetchChallenges() {
+  fetchChallenges(sessionId: string) {
     return this.httpClient
-      .get<{ challenges: Challenge[] }>('http://localhost:3000/challenges')
+      .get<{ challenges: Challenge[] }>('http://localhost:3000/challenges/' + sessionId)
       .pipe(
         map((resData) => resData.challenges),
         catchError((err) => {
@@ -25,7 +25,7 @@ export class AllChallenges {
       );
   }
 
-  addGame({ game, goal }: { game: string; goal: string }) {
+  addGame({ game, goal }: { game: string; goal: string }, sessionId: string) {
     const newChallenge: Challenge = {
       game: game,
       goal: goal,
@@ -42,38 +42,42 @@ export class AllChallenges {
       return c;
     });
 
-    return this.httpClient.put('http://localhost:3000/add-game', { challenge: newChallenge }).pipe(
-      catchError((err) => {
-        this.allChallenges.set(prevChallenges);
-        console.log(err);
-        return throwError(
-          () =>
-            new Error(
-              'Fehler beim adden einer neuen Challenge - kriegt man schon wieder hin irgendwie'
-            )
-        );
-      })
-    );
+    return this.httpClient
+      .put('http://localhost:3000/add-game', { challenge: newChallenge, sessionId: sessionId })
+      .pipe(
+        catchError((err) => {
+          this.allChallenges.set(prevChallenges);
+          console.log(err);
+          return throwError(
+            () =>
+              new Error(
+                'Fehler beim adden einer neuen Challenge - kriegt man schon wieder hin irgendwie'
+              )
+          );
+        })
+      );
   }
 
-  updateGame(newChallenge: Challenge) {
+  updateGame(newChallenge: Challenge, sessionId: string) {
     const prevChallenges = this.allChallenges();
 
-    return this.httpClient.put('http://localhost:3000/add-game', { challenge: newChallenge }).pipe(
-      catchError((err) => {
-        this.allChallenges.set(prevChallenges);
-        console.log(err);
-        return throwError(
-          () =>
-            new Error(
-              'Fehler beim adden einer neuen Challenge - kriegt man schon wieder hin irgendwie'
-            )
-        );
-      })
-    );
+    return this.httpClient
+      .put('http://localhost:3000/add-game', { challenge: newChallenge, sessionId: sessionId })
+      .pipe(
+        catchError((err) => {
+          this.allChallenges.set(prevChallenges);
+          console.log(err);
+          return throwError(
+            () =>
+              new Error(
+                'Fehler beim adden einer neuen Challenge - kriegt man schon wieder hin irgendwie'
+              )
+          );
+        })
+      );
   }
 
-  deleteGame(challengeID: string) {
+  deleteGame(challengeID: string, sessionId: string) {
     const newChallenges = this.allChallenges().filter((c) => {
       return c.id !== challengeID;
     });
@@ -82,18 +86,20 @@ export class AllChallenges {
 
     this.allChallenges.set(newChallenges);
 
-    return this.httpClient.delete('http://localhost:3000/delete-game/' + challengeID).pipe(
-      catchError((err) => {
-        this.allChallenges.set(prevChallenges);
-        console.log(err);
-        return throwError(
-          () =>
-            new Error(
-              'Fehler beim Löschen einer neuen Challenge - kriegt man schon wieder hin irgendwie'
-            )
-        );
-      })
-    );
+    return this.httpClient
+      .delete('http://localhost:3000/delete-game/' + sessionId + '/' + challengeID)
+      .pipe(
+        catchError((err) => {
+          this.allChallenges.set(prevChallenges);
+          console.log(err);
+          return throwError(
+            () =>
+              new Error(
+                'Fehler beim Löschen einer neuen Challenge - kriegt man schon wieder hin irgendwie'
+              )
+          );
+        })
+      );
   }
 
   toggleComplete(challengeID: string) {

@@ -1,8 +1,20 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnChanges,
+  OnInit,
+  signal,
+  SimpleChanges,
+} from '@angular/core';
 import { Timer } from '../timer';
 import { TimePipe } from '../time-pipe';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, throwError } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { SessionsService } from '../session-select-component/sessions-service';
+import { sign } from 'crypto';
 
 @Component({
   selector: 'app-header',
@@ -10,40 +22,49 @@ import { catchError, map, throwError } from 'rxjs';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header implements OnInit {
+export class Header implements OnInit, OnChanges {
   private destroyRef = inject(DestroyRef);
   private httpClient = inject(HttpClient);
 
   public timer: Timer;
   private headerStamp = signal<number | null>(null);
 
+  sessionsService = inject(SessionsService);
+  sessionId = this.sessionsService.currentSessionId;
+
   constructor() {
     this.timer = new Timer();
-  }
 
-  ngOnInit(): void {
-    const subscription = this.httpClient
-      .get<{ timer: number; timeStamp: number | null }>('http://localhost:3000/header')
-      .pipe(
-        catchError((err) => {
-          console.log(err);
-          return throwError(
-            () => new Error('Header-Timer konnte nicht geladen werden, naja schade')
-          );
-        })
-      )
-      .subscribe({
-        next: (timer) => {
-          // console.log('das hier sollten sekunden sein:', timer.timer);
-          this.timer.seconds = timer.timer;
-          this.headerStamp.set(timer.timeStamp);
-        },
+    effect(() => {
+      const subscription = this.httpClient
+        .get<{ timer: number; timeStamp: number | null }>(
+          'http://localhost:3000/header/' + this.sessionId()
+        )
+        .pipe(
+          catchError((err) => {
+            console.log(err);
+            return throwError(
+              () => new Error('Header-Timer konnte nicht geladen werden, naja schade')
+            );
+          })
+        )
+        .subscribe({
+          next: (timer) => {
+            // console.log('das hier sollten sekunden sein:', timer.timer);
+            this.timer.seconds = timer.timer;
+            this.headerStamp.set(timer.timeStamp);
+          },
+        });
+
+      this.destroyRef.onDestroy(() => {
+        subscription.unsubscribe();
       });
-
-    this.destroyRef.onDestroy(() => {
-      subscription.unsubscribe();
     });
   }
+
+  ngOnInit(): void {}
+
+  ngOnChanges(changes: SimpleChanges): void {}
 
   onToggleTimer() {
     this.timer.ToggleTimer();

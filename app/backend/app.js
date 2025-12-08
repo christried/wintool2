@@ -18,20 +18,28 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/challenges', async (req, res) => {
-  const fileContent = await fs.readFile('./data/challenges.json');
+app.get('/challenges/:sessionId', async (req, res) => {
+  const sessionId = req.params.sessionId;
 
-  const challengesData = JSON.parse(fileContent);
+  try {
+    const fileContent = await fs.readFile('./data/' + sessionId + '/challenges.json');
 
-  res.status(200).json({ challenges: challengesData || [] });
+    const challengesData = JSON.parse(fileContent);
+
+    res.status(200).json({ challenges: challengesData || [] });
+  } catch (error) {
+    console.log("Beim Fetchen lief was schief - vermutlich gibt's den Path nicht");
+    console.error(error);
+  }
 });
 
 app.put('/add-game', async (req, res) => {
   const challenge = req.body.challenge;
+  const sessionId = req.body.sessionId;
   console.log('PUT kriegt folgende Daten als challenge');
   console.log(challenge);
 
-  const challengesFileContent = await fs.readFile('./data/challenges.json');
+  const challengesFileContent = await fs.readFile('./data/' + sessionId + '/challenges.json');
   const challengesData = JSON.parse(challengesFileContent);
 
   let updatedChallenges = challengesData;
@@ -43,15 +51,22 @@ app.put('/add-game', async (req, res) => {
     updatedChallenges[challIndex] = challenge;
   }
 
-  await fs.writeFile('./data/challenges.json', JSON.stringify(updatedChallenges));
+  await fs.writeFile('./data/' + sessionId + '/challenges.json', JSON.stringify(updatedChallenges));
 
   res.status(200).json({ challenges: updatedChallenges });
 });
 
-app.get('/header', async (req, res) => {
-  const fileContent = await fs.readFile('./data/header-timer.json');
+app.get('/header/:sessionId', async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const timerData = {};
 
-  const timerData = JSON.parse(fileContent);
+  if (sessionId === 'initial') {
+    timerData = { timer: 889, timeStamp: 1764752996612 };
+  } else {
+    const fileContent = await fs.readFile('./data/' + sessionId + '/header-timer.json');
+
+    timerData = JSON.parse(fileContent);
+  }
 
   res.status(200).json(timerData);
 });
@@ -71,12 +86,13 @@ app.put('/header-timer', async (req, res) => {
   res.status(200).json({ headerTimer: updatedTimer });
 });
 
-app.delete('/delete-game/:id', async (req, res) => {
+app.delete('/delete-game/:sessionId/:id', async (req, res) => {
   const challengeId = req.params.id;
+  const sessionId = req.params.sessionId;
   console.log('DELETE kriegt folgende Daten als challengeId');
   console.log(challengeId);
 
-  const challengesFileContent = await fs.readFile('./data/challenges.json');
+  const challengesFileContent = await fs.readFile('./data/' + sessionId + '/challenges.json');
   const challengesData = JSON.parse(challengesFileContent);
 
   const challengeIndex = challengesData.findIndex((chal) => chal.id === challengeId);
@@ -87,7 +103,7 @@ app.delete('/delete-game/:id', async (req, res) => {
     updatedChallenges.splice(challengeIndex, 1);
   }
 
-  await fs.writeFile('./data/challenges.json', JSON.stringify(updatedChallenges));
+  await fs.writeFile('./data/' + sessionId + '/challenges.json', JSON.stringify(updatedChallenges));
 
   res.status(200).json({ challenges: updatedChallenges });
 });

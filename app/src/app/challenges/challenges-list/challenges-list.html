@@ -1,4 +1,4 @@
 @for (challenge of allChallenges(); track challenge.id) {
-<app-challenge-item [challengeItem]="challenge" />
+<app-challenge-item [challengeItem]="challenge" [sessionId]="sessionId()" />
 
 }
