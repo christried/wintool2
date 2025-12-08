@@ -1,17 +1,32 @@
-@for (session of sessions; track $index) {
-<a (click)="onSelectSession(session)" [routerLink]="['/', session]">
-  <button>
-    {{ session }}
-  </button>
-</a>
-}
-<!-- <button (click)="OnAddSession()">add session</button> -->
+<div class="container">
+  <h2 class="title">Select Your Session</h2>
 
-<form #form="ngForm">
-  <span>
-    <label>New Session</label>
-    <input id="newSession" name="newSession" [(ngModel)]="newSession" />
-  </span>
+  <div class="input-group">
+    <input
+      type="text"
+      placeholder="Enter Session Name..."
+      [ngModel]="enteredSessionName()"
+      (ngModelChange)="enteredSessionName.set($event)"
+      (keyup.enter)="onAddSession()"
+    />
+    <button class="add-btn" (click)="onAddSession()">ADD</button>
+  </div>
 
-  <button type="submit" class="add-btn" (click)="onAddSession(form)">add</button>
-</form>
+  <div class="session-grid">
+    @for (session of sessionsService.Sessions(); track session) {
+    <a
+      [routerLink]="['/', session]"
+      (click)="sessionsService.setSessionID(session)"
+      class="session-card"
+    >
+      <span class="session-name">{{ session }}</span>
+
+      <button class="delete-btn" (click)="onDeleteSession($event, session)" title="Delete Session">
+        ✕
+      </button>
+    </a>
+    } @empty {
+    <p class="empty-state">No sessions found. Create one to start!</p>
+    }
+  </div>
+</div>

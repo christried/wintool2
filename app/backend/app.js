@@ -157,6 +157,31 @@ app.post('/sessions', async (req, res) => {
   }
 });
 
+app.delete('/sessions/:sessionId', async (req, res) => {
+  const sessionId = req.params.sessionId;
+  console.log(`DELETE session: ${sessionId}`);
+
+  try {
+    const sessionsFileContent = await fs.readFile('./data/sessions.json', 'utf-8');
+    let sessionsData = JSON.parse(sessionsFileContent);
+
+    const updatedSessions = sessionsData.filter((s) => s !== sessionId);
+
+    await fs.writeFile('./data/sessions.json', JSON.stringify(updatedSessions));
+
+    try {
+      await fs.rm('./data/' + sessionId, { recursive: true, force: true });
+    } catch (err) {
+      console.error('Could not delete folder, might not exist:', err);
+    }
+
+    res.status(200).json({ sessions: updatedSessions });
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    res.status(500).json({ message: 'Could not delete session' });
+  }
+});
+
 app.delete('/delete-game/:sessionId/:id', async (req, res) => {
   const challengeId = req.params.id;
   const sessionId = req.params.sessionId;

@@ -1,8 +1,7 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SessionsService } from './sessions-service';
 import { RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { sign } from 'crypto';
 
 @Component({
   selector: 'app-session-select-component',
@@ -12,21 +11,23 @@ import { sign } from 'crypto';
 })
 export class SessionSelectComponent {
   sessionsService = inject(SessionsService);
-  sessions = this.sessionsService.Sessions();
-  newSession = signal<string>('');
+  enteredSessionName = signal('');
 
-  onAddSession(formData: NgForm) {
-    this.sessionsService.addSession(this.newSession()).subscribe({
-      next: (resData) => {
-        console.log('resData für das adden der neuen Session:');
-        console.log(resData);
-      },
+  onAddSession() {
+    if (!this.enteredSessionName().trim()) return;
+
+    this.sessionsService.addSession(this.enteredSessionName()).subscribe({
+      next: () => this.enteredSessionName.set(''),
     });
-    this.sessionsService.fetchSessions();
-    formData.form.reset();
   }
 
-  onSelectSession(sessionId: string) {
-    this.sessionsService.setSessionID(sessionId);
+  onDeleteSession(event: Event, sessionId: string) {
+    // Stop the click from triggering the router link
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (confirm('Really delete session "' + sessionId + '"?')) {
+      this.sessionsService.deleteSession(sessionId).subscribe();
+    }
   }
 }

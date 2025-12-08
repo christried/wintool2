@@ -1,18 +1,22 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, OnInit, signal } from '@angular/core';
-import { catchError, tap, throwError } from 'rxjs'; // Added tap
+import { inject, Injectable, signal } from '@angular/core';
+import { catchError, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SessionsService implements OnInit {
+export class SessionsService {
   private httpClient = inject(HttpClient);
+
+  // Initialize with empty array
   private allSessions = signal<string[]>([]);
+
+  // Public read-only signal for the component
   Sessions = this.allSessions.asReadonly();
 
   currentSessionId = signal<string>('initial');
 
-  ngOnInit(): void {
+  constructor() {
     this.fetchSessions();
   }
 
@@ -22,13 +26,11 @@ export class SessionsService implements OnInit {
       .pipe(
         catchError((err) => {
           console.log(err);
-          return throwError(() => new Error('Sessions konnten nicht geladen werden'));
+          return throwError(() => new Error('Sessions load failed'));
         })
       )
       .subscribe({
-        next: (resData) => {
-          this.allSessions.set(resData.sessions);
-        },
+        next: (resData) => this.allSessions.set(resData.sessions),
       });
   }
 
@@ -37,23 +39,30 @@ export class SessionsService implements OnInit {
       this.currentSessionId.set('initial');
     } else {
       this.currentSessionId.set(sessionID!);
-      console.log('Session ID jetzt: ' + sessionID);
     }
   }
 
   addSession(sessionId: string) {
     const body = { sessionId: sessionId };
-
     return this.httpClient
       .post<{ sessions: string[] }>('http://localhost:3000/sessions', body)
       .pipe(
-        // 3. Use 'tap' to update the list immediately with the response from the server
-        tap((resData) => {
-          this.allSessions.set(resData.sessions);
-        }),
+        tap((resData) => this.allSessions.set(resData.sessions)),
         catchError((err) => {
           console.log(err);
-          return throwError(() => new Error('Fehler beim adden einer neuen SESSION'));
+          return throwError(() => new Error('Add Session failed'));
+        })
+      );
+  }
+
+  deleteSession(sessionId: string) {
+    return this.httpClient
+      .delete<{ sessions: string[] }>('http://localhost:3000/sessions/' + sessionId)
+      .pipe(
+        tap((resData) => this.allSessions.set(resData.sessions)),
+        catchError((err) => {
+          console.log(err);
+          return throwError(() => new Error('Delete Session failed'));
         })
       );
   }
