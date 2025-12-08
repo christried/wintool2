@@ -2,6 +2,7 @@ import { inject, Injectable, input, signal } from '@angular/core';
 import { Challenge, Status } from '../models.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, throwError } from 'rxjs';
+import { environment } from '../../environments/environment.development'; // 1. Import Environment
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +13,9 @@ export class AllChallenges {
   allChallenges = signal<Challenge[]>([]);
 
   fetchChallenges(sessionId: string) {
+    // 2. Use environment.apiUrl
     return this.httpClient
-      .get<{ challenges: Challenge[] }>('http://localhost:3000/challenges/' + sessionId)
+      .get<{ challenges: Challenge[] }>(environment.apiUrl + '/challenges/' + sessionId)
       .pipe(
         map((resData) => resData.challenges),
         catchError((err) => {
@@ -42,8 +44,9 @@ export class AllChallenges {
       return c;
     });
 
+    // 3. Use environment.apiUrl
     return this.httpClient
-      .put('http://localhost:3000/add-game', { challenge: newChallenge, sessionId: sessionId })
+      .put(environment.apiUrl + '/add-game', { challenge: newChallenge, sessionId: sessionId })
       .pipe(
         catchError((err) => {
           this.allChallenges.set(prevChallenges);
@@ -61,8 +64,9 @@ export class AllChallenges {
   updateGame(newChallenge: Challenge, sessionId: string) {
     const prevChallenges = this.allChallenges();
 
+    // 4. Use environment.apiUrl
     return this.httpClient
-      .put('http://localhost:3000/add-game', { challenge: newChallenge, sessionId: sessionId })
+      .put(environment.apiUrl + '/add-game', { challenge: newChallenge, sessionId: sessionId })
       .pipe(
         catchError((err) => {
           this.allChallenges.set(prevChallenges);
@@ -86,8 +90,9 @@ export class AllChallenges {
 
     this.allChallenges.set(newChallenges);
 
+    // 5. Use environment.apiUrl
     return this.httpClient
-      .delete('http://localhost:3000/delete-game/' + sessionId + '/' + challengeID)
+      .delete(environment.apiUrl + '/delete-game/' + sessionId + '/' + challengeID)
       .pipe(
         catchError((err) => {
           this.allChallenges.set(prevChallenges);

@@ -8,13 +8,16 @@ import {
   OnInit,
   signal,
   SimpleChanges,
+  PLATFORM_ID, // Added
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common'; // Added
 import { Timer } from '../timer';
 import { TimePipe } from '../time-pipe';
 import { HttpClient } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { SessionsService } from '../session-select-component/sessions-service';
+import { environment } from '../../environments/environment.development'; // Import Environment
 
 @Component({
   selector: 'app-header',
@@ -26,6 +29,7 @@ import { SessionsService } from '../session-select-component/sessions-service';
 export class Header implements OnInit, OnChanges {
   private destroyRef = inject(DestroyRef);
   private httpClient = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID); // Inject Platform ID
 
   public timer: Timer;
   private headerStamp = signal<number | null>(null);
@@ -37,29 +41,31 @@ export class Header implements OnInit, OnChanges {
     this.timer = new Timer();
 
     effect(() => {
-      const subscription = this.httpClient
-        .get<{ timer: number; timeStamp: number | null }>(
-          'http://localhost:3000/header/' + this.sessionId()
-        )
-        .pipe(
-          catchError((err) => {
-            console.log(err);
-            return throwError(
-              () => new Error('Header-Timer konnte nicht geladen werden, naja schade')
-            );
-          })
-        )
-        .subscribe({
-          next: (timer) => {
-            // console.log('das hier sollten sekunden sein:', timer.timer);
-            this.timer.seconds = timer.timer;
-            this.headerStamp.set(timer.timeStamp);
-          },
-        });
+      // CRITICAL FIX: Only run this in the browser
+      if (isPlatformBrowser(this.platformId)) {
+        const subscription = this.httpClient
+          .get<{ timer: number; timeStamp: number | null }>(
+            environment.apiUrl + '/header/' + this.sessionId() // Use environment URL
+          )
+          .pipe(
+            catchError((err) => {
+              console.log(err);
+              return throwError(
+                () => new Error('Header-Timer konnte nicht geladen werden, naja schade')
+              );
+            })
+          )
+          .subscribe({
+            next: (timer) => {
+              this.timer.seconds = timer.timer;
+              this.headerStamp.set(timer.timeStamp);
+            },
+          });
 
-      this.destroyRef.onDestroy(() => {
-        subscription.unsubscribe();
-      });
+        this.destroyRef.onDestroy(() => {
+          subscription.unsubscribe();
+        });
+      }
     });
   }
 
@@ -85,8 +91,9 @@ export class Header implements OnInit, OnChanges {
       updatedTimerData.seconds = this.timer.seconds + Math.floor(ms / 1000);
     }
 
+    // Use environment URL
     const subscription = this.httpClient
-      .put('http://localhost:3000/header-timer', updatedTimerData)
+      .put(environment.apiUrl + '/header-timer', updatedTimerData)
       .pipe(
         catchError((err) => {
           console.log(err);

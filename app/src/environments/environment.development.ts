@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://wintool-backend.run.app',
+
+  apiUrl: 'https://us-central1-wintool2-1.cloudfunctions.net/api',
 };
