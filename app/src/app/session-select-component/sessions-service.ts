@@ -1,20 +1,36 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { inject, Injectable, OnInit, signal } from '@angular/core';
+import { catchError, tap, throwError } from 'rxjs'; // Added tap
 
 @Injectable({
   providedIn: 'root',
 })
-export class SessionsService {
+export class SessionsService implements OnInit {
   private httpClient = inject(HttpClient);
-
-  // speichern aller Session-Namen als string - erstmal dummy daten
-  private allSessions = signal<string[]>(['testwinnie', 'testwinnie2', 'testwinnie3']);
-
+  private allSessions = signal<string[]>([]);
   Sessions = this.allSessions.asReadonly();
 
-  // Global signal for the current session
   currentSessionId = signal<string>('initial');
+
+  ngOnInit(): void {
+    this.fetchSessions();
+  }
+
+  fetchSessions() {
+    this.httpClient
+      .get<{ sessions: string[] }>('http://localhost:3000/sessions')
+      .pipe(
+        catchError((err) => {
+          console.log(err);
+          return throwError(() => new Error('Sessions konnten nicht geladen werden'));
+        })
+      )
+      .subscribe({
+        next: (resData) => {
+          this.allSessions.set(resData.sessions);
+        },
+      });
+  }
 
   setSessionID(sessionID?: string) {
     if (this.currentSessionId() !== 'initial') {
@@ -26,15 +42,19 @@ export class SessionsService {
   }
 
   addSession(sessionId: string) {
-    this.allSessions.update((prevSessions) => [...prevSessions, sessionId]);
-
     const body = { sessionId: sessionId };
 
-    return this.httpClient.post('http://localhost:3000/sessions', body).pipe(
-      catchError((err) => {
-        console.log(err);
-        return throwError(() => new Error('Fehler beim adden einer neuen SESSION'));
-      })
-    );
+    return this.httpClient
+      .post<{ sessions: string[] }>('http://localhost:3000/sessions', body)
+      .pipe(
+        // 3. Use 'tap' to update the list immediately with the response from the server
+        tap((resData) => {
+          this.allSessions.set(resData.sessions);
+        }),
+        catchError((err) => {
+          console.log(err);
+          return throwError(() => new Error('Fehler beim adden einer neuen SESSION'));
+        })
+      );
   }
 }

@@ -100,6 +100,18 @@ app.put('/header-timer', async (req, res) => {
   }
 });
 
+app.get('/sessions', async (req, res) => {
+  try {
+    const fileContent = await fs.readFile('./data/sessions.json', 'utf-8');
+    const sessionsData = JSON.parse(fileContent);
+
+    res.status(200).json({ sessions: sessionsData });
+  } catch (error) {
+    console.log('No sessions file found, returning empty array.');
+    res.status(200).json({ sessions: [] });
+  }
+});
+
 app.post('/sessions', async (req, res) => {
   const newSessionId = req.body.sessionId;
 

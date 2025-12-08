@@ -22,6 +22,7 @@ export class SessionSelectComponent {
         console.log(resData);
       },
     });
+    this.sessionsService.fetchSessions();
     formData.form.reset();
   }
 
