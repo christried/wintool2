@@ -19,9 +19,7 @@ export class NewChallenge {
 
   onAddGame(formData: NgForm) {
     // console.log(formData);
-
-    formData.form.controls['game'].markAsTouched();
-    formData.form.controls['goal'].markAsTouched();
+    formData.form.markAllAsTouched();
 
     if (formData.form.invalid) {
       return;

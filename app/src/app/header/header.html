@@ -1,10 +1,14 @@
 <div class="header">
-  @if (sessionsService.currentSessionId() !== "initial") {
+  @if (sessionsService.currentSessionId()) {
   <a (click)="onClickBack()" routerLink="../" class="back-btn">🔙</a>
+
   }
+
   <h1 class="hero-title">wintool2</h1>
 
-  <p class="timer">{{ { ss: timer.seconds } | time }}</p>
+  @if (sessionsService.currentSessionId()) {
 
+  <p class="timer">{{ { ss: timer.seconds } | time }}</p>
   <button class="btn" (click)="onToggleTimer()">{{ isTimerRunning() }}</button>
+  }
 </div>
