@@ -1,6 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, input, inject, OnInit } from '@angular/core';
 import { NewChallenge } from './new-challenge/new-challenge';
 import { ChallengesList } from './challenges-list/challenges-list';
+import { SessionsService } from '../session-select-component/sessions-service';
 
 @Component({
   selector: 'app-challenges',
@@ -8,6 +9,12 @@ import { ChallengesList } from './challenges-list/challenges-list';
   templateUrl: './challenges.html',
   styleUrl: './challenges.css',
 })
-export class Challenges {
+export class Challenges implements OnInit {
+  sessionsService = inject(SessionsService);
+
   sessionId = input.required<string>();
+
+  ngOnInit() {
+    this.sessionsService.currentSessionId.set(this.sessionId());
+  }
 }
