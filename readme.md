@@ -1,4 +1,5 @@
 second attempt, no ng material
+My app lacks functionality regarding user-restricted access. Type access is restricted by rules enforced in firebase firestore so only session and timer data can be accessed. If spam abused, budget limits apply and shut down the app immediately.
 
 # wintool2 🏆
 
