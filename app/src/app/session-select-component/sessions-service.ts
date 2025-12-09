@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { catchError, throwError } from 'rxjs';
+import { catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
 import { db } from '../firebase.config';
@@ -61,11 +61,17 @@ export class SessionsService {
   }
 
   deleteSession(sessionId: string) {
+    // FIX: Use encodeURIComponent to handle spaces and special chars like '#'
     return this.httpClient
-      .delete<{ sessions: string[] }>(environment.apiUrl + '/sessions/' + sessionId)
+      .delete<{ sessions: string[] }>(
+        environment.apiUrl + '/sessions/' + encodeURIComponent(sessionId)
+      )
       .pipe(
+        tap((resData) => this.allSessions.set(resData.sessions)),
         catchError((err) => {
           console.log(err);
+
+          alert('Delete failed! Check console for details.');
           return throwError(() => new Error('Delete Session failed'));
         })
       );
