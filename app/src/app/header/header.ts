@@ -47,7 +47,6 @@ export class Header implements OnInit, OnChanges {
       const currentId = this.sessionId();
 
       if (isPlatformBrowser(this.platformId) && currentId && currentId !== 'initial') {
-        //  Listen to the specific session document
         const sessionDocRef = doc(db, 'sessions', currentId);
 
         const unsubscribe = onSnapshot(sessionDocRef, (docSnap) => {
@@ -55,16 +54,22 @@ export class Header implements OnInit, OnChanges {
             const data = docSnap.data();
             const serverTimer = data['headerTimer'] || { timer: 0, timeStamp: null };
 
-            // Update the seconds
-            this.timer.seconds = serverTimer.timer;
+            //  Calculate the correct time
+            if (serverTimer.timeStamp) {
+              // Timer is running: Add the elapsed time to the base seconds
+              const now = Date.now();
+              const elapsedSeconds = Math.floor((now - serverTimer.timeStamp) / 1000);
+              this.timer.seconds = serverTimer.timer + elapsedSeconds;
+            } else {
+              // Timer is stopped: Just use the stored value
+              this.timer.seconds = serverTimer.timer;
+            }
+
             this.headerStamp.set(serverTimer.timeStamp);
 
-            // If server has a timestamp (running) but local is stopped -> Start Local
             if (serverTimer.timeStamp && !this.timer.isRunning()) {
               this.timer.ToggleTimer();
-            }
-            // If server has no timestamp (paused) but local is running -> Stop Local
-            else if (!serverTimer.timeStamp && this.timer.isRunning()) {
+            } else if (!serverTimer.timeStamp && this.timer.isRunning()) {
               this.timer.ToggleTimer();
             }
           }
