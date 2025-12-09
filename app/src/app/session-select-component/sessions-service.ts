@@ -1,45 +1,43 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal, PLATFORM_ID } from '@angular/core'; // Added PLATFORM_ID
-import { isPlatformBrowser } from '@angular/common'; // Added isPlatformBrowser
+import { inject, Injectable, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { catchError, tap, throwError } from 'rxjs';
-import { environment } from '../../environments/environment.development'; // Import Environment
+import { environment } from '../../environments/environment.development';
+
+import { db } from '../firebase.config';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SessionsService {
   private httpClient = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID); // Inject Platform ID
+  private platformId = inject(PLATFORM_ID);
 
-  // Initialize with empty array
   private allSessions = signal<string[]>([]);
-
-  // Public read-only signal for the component
   Sessions = this.allSessions.asReadonly();
-
   currentSessionId = signal<string>('initial');
 
   constructor() {
-    // CRITICAL FIX: Only fetch if we are in the browser!
-    // This prevents the "ECONNREFUSED" error during the build.
     if (isPlatformBrowser(this.platformId)) {
       this.fetchSessions();
     }
   }
 
   fetchSessions() {
-    // Use environment.apiUrl instead of localhost
-    this.httpClient
-      .get<{ sessions: string[] }>(environment.apiUrl + '/sessions')
-      .pipe(
-        catchError((err) => {
-          console.log(err);
-          return throwError(() => new Error('Sessions load failed'));
-        })
-      )
-      .subscribe({
-        next: (resData) => this.allSessions.set(resData.sessions),
-      });
+    const sessionsCollection = collection(db, 'sessions');
+
+    // function triggers automatically whenever the database changes
+    onSnapshot(
+      sessionsCollection,
+      (snapshot) => {
+        const sessionIds = snapshot.docs.map((doc) => doc.id);
+        this.allSessions.set(sessionIds);
+      },
+      (error) => {
+        console.error('Real-time error:', error);
+      }
+    );
   }
 
   setSessionID(sessionID?: string) {
@@ -52,11 +50,9 @@ export class SessionsService {
 
   addSession(sessionId: string) {
     const body = { sessionId: sessionId };
-    // Use environment.apiUrl
     return this.httpClient
       .post<{ sessions: string[] }>(environment.apiUrl + '/sessions', body)
       .pipe(
-        tap((resData) => this.allSessions.set(resData.sessions)),
         catchError((err) => {
           console.log(err);
           return throwError(() => new Error('Add Session failed'));
@@ -65,11 +61,9 @@ export class SessionsService {
   }
 
   deleteSession(sessionId: string) {
-    // Use environment.apiUrl
     return this.httpClient
       .delete<{ sessions: string[] }>(environment.apiUrl + '/sessions/' + sessionId)
       .pipe(
-        tap((resData) => this.allSessions.set(resData.sessions)),
         catchError((err) => {
           console.log(err);
           return throwError(() => new Error('Delete Session failed'));

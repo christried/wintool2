@@ -8,16 +8,19 @@ import {
   OnInit,
   signal,
   SimpleChanges,
-  PLATFORM_ID, // Added
+  PLATFORM_ID,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common'; // Added
+import { isPlatformBrowser } from '@angular/common';
 import { Timer } from '../timer';
 import { TimePipe } from '../time-pipe';
 import { HttpClient } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { SessionsService } from '../session-select-component/sessions-service';
-import { environment } from '../../environments/environment.development'; // Import Environment
+import { environment } from '../../environments/environment.development';
+
+import { db } from '../firebase.config';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 @Component({
   selector: 'app-header',
@@ -29,7 +32,7 @@ import { environment } from '../../environments/environment.development'; // Imp
 export class Header implements OnInit, OnChanges {
   private destroyRef = inject(DestroyRef);
   private httpClient = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID); // Inject Platform ID
+  private platformId = inject(PLATFORM_ID);
 
   public timer: Timer;
   private headerStamp = signal<number | null>(null);
@@ -41,41 +44,44 @@ export class Header implements OnInit, OnChanges {
     this.timer = new Timer();
 
     effect(() => {
-      // CRITICAL FIX: Only run this in the browser
-      if (isPlatformBrowser(this.platformId)) {
-        const subscription = this.httpClient
-          .get<{ timer: number; timeStamp: number | null }>(
-            environment.apiUrl + '/header/' + this.sessionId() // Use environment URL
-          )
-          .pipe(
-            catchError((err) => {
-              console.log(err);
-              return throwError(
-                () => new Error('Header-Timer konnte nicht geladen werden, naja schade')
-              );
-            })
-          )
-          .subscribe({
-            next: (timer) => {
-              this.timer.seconds = timer.timer;
-              this.headerStamp.set(timer.timeStamp);
-            },
-          });
+      const currentId = this.sessionId();
+
+      if (isPlatformBrowser(this.platformId) && currentId && currentId !== 'initial') {
+        //  Listen to the specific session document
+        const sessionDocRef = doc(db, 'sessions', currentId);
+
+        const unsubscribe = onSnapshot(sessionDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const serverTimer = data['headerTimer'] || { timer: 0, timeStamp: null };
+
+            // Update the seconds
+            this.timer.seconds = serverTimer.timer;
+            this.headerStamp.set(serverTimer.timeStamp);
+
+            // If server has a timestamp (running) but local is stopped -> Start Local
+            if (serverTimer.timeStamp && !this.timer.isRunning()) {
+              this.timer.ToggleTimer();
+            }
+            // If server has no timestamp (paused) but local is running -> Stop Local
+            else if (!serverTimer.timeStamp && this.timer.isRunning()) {
+              this.timer.ToggleTimer();
+            }
+          }
+        });
 
         this.destroyRef.onDestroy(() => {
-          subscription.unsubscribe();
+          unsubscribe();
         });
       }
     });
   }
 
   ngOnInit(): void {}
-
   ngOnChanges(changes: SimpleChanges): void {}
 
   onToggleTimer() {
     this.timer.ToggleTimer();
-
     this.headerStamp.set(Date.now());
 
     const updatedTimerData = {
@@ -84,29 +90,24 @@ export class Header implements OnInit, OnChanges {
       sessionId: this.sessionId(),
     };
 
-    updatedTimerData.timeStamp = this.timer.isRunning() ? Date.now() : updatedTimerData.timeStamp;
+    updatedTimerData.timeStamp = this.timer.isRunning() ? Date.now() : null; // Send null if stopped
 
     if (!this.timer.isRunning()) {
       const ms = Date.now() - this.headerStamp()!;
       updatedTimerData.seconds = this.timer.seconds + Math.floor(ms / 1000);
     }
 
-    // Use environment URL
-    const subscription = this.httpClient
+    this.httpClient
       .put(environment.apiUrl + '/header-timer', updatedTimerData)
       .pipe(
         catchError((err) => {
           console.log(err);
-          return throwError(() => new Error('Fehler beim Updaten des Header-Timers ins Backend'));
+          return throwError(() => new Error('Fehler beim Updaten'));
         })
       )
       .subscribe({
-        next: (resData) => {
-          console.log('Header-Timer Update successful', resData);
-        },
+        next: (resData) => console.log('Timer synced'),
       });
-
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   isTimerRunning() {
